@@ -1,0 +1,1 @@
+export const basePath = `https://pixabay.com/api/?key=46998784-1c4cc40ef84575973e87a2676`
