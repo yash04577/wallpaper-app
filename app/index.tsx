@@ -6,16 +6,20 @@ import {
   ScrollView,
   Image,
   Dimensions,
+  StatusBar as RNStatusBar,
+  Platform,
+  StyleSheet
 } from "react-native";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import Feather from "@expo/vector-icons/Feather";
 import "../global.css";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { FlashList, MasonryFlashList } from "@shopify/flash-list";
 import { useRouter } from "expo-router";
 import { useDispatch } from "react-redux";
 import { getImagesAsynch, resetData } from "@/redux/imageSlice";
 import { useSelector } from "react-redux";
+import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet';
 
 export default function HomeScreen() {
   const [searchText, setSearchText] = useState("");
@@ -51,6 +55,11 @@ export default function HomeScreen() {
   const [query, setQuery] = useState({
     page: 1,
     search: "",
+    category: "",
+    image_type: "",
+    order: "",
+    colors: "",
+    orientation: "",
   })
 
   useEffect(()=>{
@@ -64,13 +73,46 @@ export default function HomeScreen() {
   },[query])
 
 
+  const handleCategory = (value:string) =>{
+    if(query.category == value){
+      setQuery({
+        page: 1,
+    search: "",
+    category: "",
+    image_type: "",
+    order: "",
+    colors: "",
+    orientation: "",
+      })
+    }
+    else{
+      setQuery({
+        page: 1,
+    search: "",
+    category: value,
+    image_type: "",
+    order: "",
+    colors: "",
+    orientation: "",
+      })
+    }
+  }
+
+
+  const [showFilter, setShowFilter] = useState<boolean>(false);
+
+
+
   return (
-    <View className="h-screen w-screen flex bg-[#efefef]">
+    <View style={{ flex: 1, paddingTop: Platform.OS === 'android' ? RNStatusBar.currentHeight : 0 }} className={`h-screen w-screen flex bg-[#efefef]`}>
+     
       <View className="w-[90%] mx-auto">
         {/* header start here */}
         <View className="flex flex-row justify-between mt-5">
           <Text className="text-3xl font-semibold">Pixels</Text>
-          <FontAwesome6 name="bars-staggered" size={24} color="black" />
+          <TouchableOpacity onPress={()=>router.push({pathname: "/filter",query: { ...query }})}>
+            <FontAwesome6 name="bars-staggered" size={24} color="black" />
+          </TouchableOpacity>
         </View>
 
         {/* searchbar starts here */}
@@ -85,7 +127,7 @@ export default function HomeScreen() {
           <TextInput
             placeholder="Search for photos..."
             className="bg-white rounded-lg h-[50px] placeholder:pl-[40px]"
-            onChangeText={(text)=> setQuery({page:1, search:text})}
+            onChangeText={(text)=> setQuery({page:1, search:text, category:"", colors:"", image_type:"", order:"", orientation:""})}
           />
         </View>
 
@@ -93,8 +135,8 @@ export default function HomeScreen() {
         <View>
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
             {category?.map((value: any) => (
-              <TouchableOpacity className="rounded-lg bg-white py-2 px-4 mr-2">
-                <Text>{value}</Text>
+              <TouchableOpacity onPress={()=>handleCategory(value)} className={`rounded-lg ${query.category == value ? 'bg-slate-500' : 'bg-white'} py-2 px-4 mr-2 capitalize`}>
+                <Text className={`${query.category == value ? "text-white" : ""}`}>{value}</Text>
               </TouchableOpacity>
             ))}
           </ScrollView>
@@ -105,11 +147,11 @@ export default function HomeScreen() {
           <MasonryFlashList
             data={data}
             numColumns={2} 
-            onEndReached={()=> setQuery((prev)=>({
-              ...prev,
-              page: prev.page+1
-            }))}
-            onEndReachedThreshold={1}
+            // onEndReached={()=> setQuery((prev)=>({
+            //   ...prev,
+            //   page: prev.page+1
+            // }))}
+            // onEndReachedThreshold={1}
             showsHorizontalScrollIndicator={false}
             showsVerticalScrollIndicator={false}
             renderItem={({ item }) => (
@@ -117,8 +159,8 @@ export default function HomeScreen() {
                 <TouchableOpacity onPress={()=> router.push({pathname: "/image", params: item})}>
 
                 <Image
-                  source={{ uri: item?.previewURL }}
-                  height={item?.previewHeight}
+                  source={{ uri: item?.webformatURL }}
+                  height={item?.webformatHeight}
                   width={deviceWidth / 2 - 25 }
                   className="rounded-lg mb-2"
                   />
@@ -128,40 +170,20 @@ export default function HomeScreen() {
             estimatedItemSize={200}
           />
         </View>
-
-        {/* <View className='my-5 flex'>
-          <FlatList 
-            data={data}      
-            numColumns={2}
-            className='flex gap-4' 
-            columnWrapperStyle={{ justifyContent: 'space-between' }} 
-            renderItem={({item}) => <View className=''>
-              <Image 
-                source={{uri: item?.previewURL}} 
-                height={item?.previewHeight} 
-                width={(deviceWidth/2) - 30} 
-                // width={item?.previewWidth} 
-                className='rounded-lg my-2'
-              />
-            </View> }    
-          />
-        </View> */}
-
-        {/* <View className="my-5 flex">
-          <MasonryList
-            // images={data?.map((item) => ({
-            //   uri: item.previewURL,
-            //   height: item.previewHeight,
-            //   width: item.previewWidth,
-            // }))}
-           
-            columns={2} // Number of columns
-            spacing={8} // Adjusts the gap between images
-            imageContainerStyle={{ borderRadius: 10, marginVertical: 8 }}
-            className="border-2 border-red-400"
-          />
-        </View> */}
       </View>
+      {/* </BottomSheet> */}
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: 'grey',
+  },
+  contentContainer: {
+    flex: 1,
+    padding: 36,
+    alignItems: 'center',
+  },
+});

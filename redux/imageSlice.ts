@@ -7,8 +7,8 @@ export const getImagesAsynch = createAsyncThunk(
   async (param, thunkAPI) => {
     try {
         console.log("param ", param)
-      const {data} = await axios.get(`${basePath}&page=${param?.page}&q=${param?.search}`);
-    //   console.log("resssssss ", data);
+      const {data} = await axios.get(`${basePath}&page=${param?.page}&q=${param?.search}&category=${param?.category}`);
+      // console.log("resssssss ", data);
       return data;
     } catch (error) {
       console.log("error on fetching images ", error)
