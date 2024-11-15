@@ -22,8 +22,8 @@ const filter = () => {
   })
 
   const handleSelect = (key:string, value:string) =>{
-    console.log("key ", key)
-    console.log("sel ", filters[key]);
+    // console.log("key ", key)
+    // console.log("sel ", filters[key]);
     const selectedKey = filters[key];
 
     if(selectedKey == value){
@@ -46,7 +46,7 @@ const filter = () => {
 
 const handleReset = () =>{
 
-  router.push("/")  
+  router.back(); 
 
   setFilters({
     image_type: "",
@@ -66,7 +66,7 @@ const handleApply = async() =>{
     page: 1
   }))
 
-  router.push("/")
+  router.back();
 }
 
   return (
